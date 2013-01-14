@@ -2,17 +2,18 @@
   (:use clojure.test
         depsat.core)
   (:import (java.math BigInteger)
-           (org.sat4j.pb IPBSolver SolverFactory)
-           (org.sat4j.core Vec VecInt)))
+           (org.sat4j.specs ISolver)
+           (org.sat4j.core Vec VecInt)
+           (org.sat4j.minisat SolverFactory)))
 
-(defn- vec-int [coll]
+(defn- ^VecInt vec-int [coll]
   (VecInt. (int-array coll)))
 
-(defn- vec-big [coll]
+(defn- ^Vec vec-big [coll]
   (Vec. (to-array (map biginteger coll))))
 
-(defn- ^IPBSolver sample []
-  (let [solver (SolverFactory/newDefault)]
+(defn- ^ISolver sample []
+  (let [solver (SolverFactory/newLight)] ; or newDefault
     (.newVar solver 8)
     (.setExpectedNumberOfClauses solver 10)
     (.addClause solver (vec-int [1]))
@@ -25,20 +26,9 @@
     (.addClause solver (vec-int [-8 6]))
     (.addExactly solver (vec-int [2 3 4]) 1)
     (.addExactly solver (vec-int [5 6 7]) 1)
-    ;; (.addPseudoBoolean solver
-    ;;                    (vec-int [2 3 4])
-    ;;                    (vec-big [3 2 1]) ; coeffs, lower prefered
-    ;;                    false
-    ;;                    (biginteger 1))
-    ;; (.addPseudoBoolean solver
-    ;;                    (vec-int [5 6 7])
-    ;;                    (vec-big [1 1 1]) ; coeffs, lower prefered
-    ;;                    false
-    ;;                    (biginteger 1))
-    solver
-    ))
+    solver))
 
-(defn- models [solver]
+(defn- models [^ISolver solver]
   (lazy-seq
    (if (.isSatisfiable solver)
      (let [m (.model solver)]
@@ -56,6 +46,4 @@
   (let [solver (sample)]
     (is solver)
     (is (= #{ [1, 3, 6, 8] [1, 4, 6, 8] }
-           (set (models solver)))))
-;    (doseq [m (models (sample))] (prn m))
-  )
+           (set (models solver))))))
