@@ -6,6 +6,21 @@
            (org.sat4j.core Vec VecInt)
            (org.sat4j.minisat SolverFactory)))
 
+(deftest test-package-store
+  (is (= 0 (count @*packages*)))
+  (with-local-packages
+    (merge-package {:name "a" :versions #{ {:version [1 0] :t true} }})
+    (merge-package {:name "a" :versions [ {:version [1 0] :t false}
+                                          {:version [2 0]} ]})
+    (merge-package {:name "no_versions"})
+    (prn @*packages*)
+    (is (= {:name "no_versions" :versions {}} (get-package "no_versions")))
+    (is (= {:version [1 0] :t false}          (get-package "a" [1 0]) ))
+    (is (= {:version [2 0]} )                 (get-package "a" [2 0]) ))
+  (is (= 0 (count @*packages*))))
+
+;; FIXME: Prototype SAT interactions
+
 (defn- ^VecInt vec-int [coll]
   (VecInt. (int-array coll)))
 
