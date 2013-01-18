@@ -37,35 +37,47 @@
 (deftest test-version-split-pre
   (is (= [ [1 0] ["alpha" 3] ]
          (version-split-pre [1 0 :- "alpha" 3])))
-  (is (= [ [1 0] nil ]
-         (version-split-pre [1 0]))))
+  (is (= [ [1 0] ] (version-split-pre [1 0]))))
 
 (deftest test-version-compare
   (is (= 0  (version-compare []    [])))
+  (is (= 0  (version-compare [nil] [])))
   (is (= 0  (version-compare [1]   [1])))
   (is (= 0  (version-compare [1 0] [1])))
   (is (= 0  (version-compare [1]   [1 0])))
-  (is (= 0  (version-compare [1   :- "alpha" 0]   [1 :- "alpha" ])))
-  (is (= 0  (version-compare [1 0 :- "alpha" 0]   [1 :- "alpha" ])))
+  (is (= 0  (version-compare [1   :- "alpha" 0] [1 :- "alpha" ])))
+  (is (= 0  (version-compare [1 0 :- "alpha" 0] [1 :- "alpha" ])))
 
   (is (pos? (version-compare [1 1] [1 0])))
   (is (pos? (version-compare [1 1] [1])))
   (is (pos? (version-compare [1 0] [1 0 :- "alpha" ])))
   (is (pos? (version-compare [1 0] [1   :- "beta" ])))
-  (is (pos? (version-compare [1 :- "alpha" 1]   [1 :- "alpha" ])))
-  (is (pos? (version-compare [1 :- "alpha" 1]   [1 :- "alpha" 0])))
+  (is (pos? (version-compare [1 :- "alpha" 1] [1 :- "alpha" ])))
+  (is (pos? (version-compare [1 :- "alpha" 1] [1 :- "alpha" 0])))
 
   (is (neg? (version-compare [1 0] [1 1])))
-  (is (neg? (version-compare [1]   [1 1])))
-  (is (neg? (version-compare [1 0 :- 1] [1 0]))) ;FIXME: Fail in validation?
+  (is (neg? (version-compare [1] [1 1])))
+  (is (neg? (version-compare [1 0 :- 1] [1 0]))) ;FIXME: Invalid?
   (is (neg? (version-compare [1 :- "alpha" 1]   [1 :- "beta" ]))))
 
 (deftest test-version-parse
-  (is (= [nil] (version-parse "")))
-  (is (= [1  ] (version-parse "1")))
+  (is (= []     (version-parse "")))
+  (is (= ["a"]  (version-parse "a")))
+  (is (= [1]    (version-parse "1")))
   (is (= [1 33] (version-parse "1.33")))
-  (is (= [1 0 :- 1] (version-parse "1.0-1")))
+  (is (= [1 0 :- 1]         (version-parse "1.0-1"))) ;FIXME: Invalid?
   (is (= [1 0 :- "alpha" 1] (version-parse "1.0-alpha.1"))))
+
+(deftest test-vstr-check-ws
+  (is (vstr-check-ws "1.3"))
+  (is (thrown-with-msg? IllegalArgumentException #"'1.3\[ \\n\]'$"
+        (vstr-check-ws "1.3 \n")))
+  (is (thrown-with-msg? IllegalArgumentException #"'\[\\t\\t\]1.3'$"
+        (vstr-check-ws "\t\t1.3 \n")))
+  (is (thrown-with-msg? IllegalArgumentException #"'1.3\[ \]4.9'$"
+        (vstr-check-ws "1.3 4.9"))))
+
+;; FIXME: replace these
 
 (defn o>= [v1 v2]
   (>= (version-compare v1 v2) 0))
