@@ -79,30 +79,17 @@
 
 ;; FIXME: replace these
 
-(defn o>= [v1 v2]
-  (>= (version-compare v1 v2) 0))
-
-(defn o< [v1 v2]
-  (< (version-compare v1 v2) 0))
-
-(defn o!= [v1 v2]
-  (not (= (version-compare v1 v2) 0)))
-
-(deftest test-numeric-comparable
-  (is (not (o>= [0 1] [0 2])))
-  (is (not (o>= [0 2] [0 2 1])))
-  (is (o>= [0 2] [0 2]))
-  (is (o>= [0 2 1] [0 2]))
-  (is (o>= [0 3] [0 2])))
-
 (def package
   {:name "a"
    :versions [{:version [1 0]
-               :deps {"b" [ #(o>= % [0 3]) #( o< % [1]) ]}}]})
-
-(defn- matches? [dep preds]
-  (every? identity (map #(% dep) preds)))
+               :deps {"b" [ [:gte [0 3]] [:lt [1]] ]}}]})
 
 (deftest test-range
-  (let [preds ((:deps (first (:versions package))) "b")]
-    (is (matches? [0 4] preds))))
+  (let [deps ((:deps (first (:versions package))) "b")]
+    (is (not (matches-deps? [0 2] deps)))
+    (is (not (matches-deps? [0 2 1] deps)))
+    (is (matches-deps? [0 3 0] deps))
+    (is (matches-deps? [0 3 1] deps))
+    (is (matches-deps? [0 4] deps))
+    (is (not (matches-deps? [1] deps)))
+    (is (not (matches-deps? [1 1] deps)))))

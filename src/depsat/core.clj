@@ -11,7 +11,7 @@
 ;; Sample package map:
 ;;   {:name "a"
 ;;    :versions { [1 0] {:version [1 0]
-;;                :deps {"b" [ #(o>= % [0 3]) #( o< % [1]) ]}}}}
+;;                       :deps {"b" [ [:gte [0 3]] [:lt [1]] ]}}}}
 
 (def ^:dynamic *packages* (ref {}))
 
