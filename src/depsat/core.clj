@@ -19,38 +19,43 @@
   `(binding [*packages* (ref {})]
     ~@body))
 
-(defn package-key [p]
-  (p :name))
+(defn package-key [pack]
+  (pack :name))
 
 (defn versions-to-map [versions]
   (if (not (map? versions))
     (zipmap (map :version versions) versions)
     versions))
 
-(defn merge-package-versions [oldp newp]
-  (into (or (get oldp :versions) (sorted-map-by version-compare))
-        (versions-to-map (get newp :versions))))
+(defn merge-package-versions [old-pack pack]
+  (into (or (get old-pack :versions) (sorted-map-by version-compare))
+        (versions-to-map (get pack :versions))))
 
-(defn merge-package [p]
-  (dosync
-   (alter *packages*
-          (fn [tpacks]
-            (let [old-pack (tpacks (package-key p))]
-              (assoc tpacks
-                (package-key p)
-                (assoc
-                  ;;; In general, new package p replaces old-pack values
-                  (merge old-pack p)
-                  ;;; But versions are merged as a sorted-map, with
-                  ;;; version keys
-                  :versions
-                  (merge-package-versions old-pack p))))))))
+(defn merge-package
+  ([pack]
+     (dosync (alter *packages* (partial merge-package pack))))
+  ([pack packages]
+     (let [old-pack (packages (package-key pack))]
+       (assoc packages
+         (package-key pack)
+         (assoc
+           ;;; In general, new pack replaces old-pack values
+           (merge old-pack pack)
+           ;;; But versions are merged as a sorted-map, with
+           ;;; version keys
+           :versions
+           (merge-package-versions old-pack pack))))))
 
-(defn merge-packages [packs]
-  (dosync
-   (reduce (fn [memo pack] (merge-package pack))
-           nil
-           (if (map? packs) (vals packs) packs))))
+(defn- reduce-packages [packs f]
+  (reduce (fn [memo pack] (f pack))
+          nil
+          (if (map? packs) (vals packs) packs)))
+
+(defn merge-packages
+  ([packs]
+     (dosync (reduce-packages packs #(merge-package %))))
+  ([packs packages]
+     (reduce-packages packs #(merge-package % packages))))
 
 (defn get-package
   ([name] (@*packages* name))

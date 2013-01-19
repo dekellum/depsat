@@ -64,6 +64,10 @@
    :eq  =,
    :ne  not=})
 
+;; FIXME: These match checks need pre-release awareness, i.e. < 5.0
+;; should not match 5.0.alpha.1. Other operators to properly support
+;; pre-release versions?
+
 (defn matches-deps? [version deps]
   "True, if the sequence of dependency qualifiers deps all match the
   provided version."

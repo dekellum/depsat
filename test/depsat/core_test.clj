@@ -29,7 +29,7 @@
 
 (deftest test-packages-store
   (with-local-packages
-    (merge-packages [
+    (is (= 4 (count (merge-packages [
       {:name "a"
        :versions [{:version [1 0]
                    :deps {"b" [[:gte [1 0]] [:lt [1 3]]]
@@ -48,8 +48,7 @@
                   {:version [2 2]}]}
       {:name "d"
        :versions [{:version [1 0]
-                   :deps {"c" [[:eq [2 1]]]}}]}])
-    (is (= 4 (count @*packages*)))))
+                   :deps {"c" [[:eq [2 1]]]}}]}]))))))
 
 (defn- ^ISolver sample []
   (let [solver (SolverFactory/newLight)] ; or newDefault
