@@ -61,6 +61,7 @@
    :gte >=,
    :lt  <,
    :lte <=,
+   :eq  =,
    :ne  not=})
 
 (defn matches-deps? [version deps]

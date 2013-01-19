@@ -27,6 +27,30 @@
 (defn- ^Vec vec-big [coll]
   (Vec. (to-array (map biginteger coll))))
 
+(deftest test-packages-store
+  (with-local-packages
+    (merge-packages [
+      {:name "a"
+       :versions [{:version [1 0]
+                   :deps {"b" [[:gte [1 0]] [:lt [1 3]]]
+                          "c" [[:gte [2 0]] [:lt [2 3]]]
+                          "d" [[:gte [1 0]] [:lt [1.1]]]}}]}
+      {:name "b"
+       :versions [{:version [1 0]
+                   :deps {"c" [[:gte [2 0]] [:lt [2 1]]]}}
+                  {:version [1 1]
+                   :deps {"c" [[:gte [2 1]] [:lt [2 2]]]}}
+                  {:version [1 2]
+                   :deps {"c" [[:gte [2 2]] [:lt [2 3]]]}}]}
+      {:name "c"
+       :versions [{:version [2 0]}
+                  {:version [2 1]}
+                  {:version [2 2]}]}
+      {:name "d"
+       :versions [{:version [1 0]
+                   :deps {"c" [[:eq [2 1]]]}}]}])
+    (is (= 4 (count @*packages*)))))
+
 (defn- ^ISolver sample []
   (let [solver (SolverFactory/newLight)] ; or newDefault
     (.newVar solver 8)

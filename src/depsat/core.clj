@@ -46,6 +46,12 @@
                   :versions
                   (merge-package-versions old-pack p))))))))
 
+(defn merge-packages [packs]
+  (dosync
+   (reduce (fn [memo pack] (merge-package pack))
+           nil
+           (if (map? packs) (vals packs) packs))))
+
 (defn get-package
   ([name] (@*packages* name))
   ([name version] (get (:versions (@*packages* name)) version)))
