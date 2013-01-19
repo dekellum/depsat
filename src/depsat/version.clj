@@ -64,10 +64,12 @@
    :ne  not=})
 
 (defn matches-deps? [version deps]
-  (reduce (fn [mem d]
-            (and mem
-                 ((dep-fn-map (first d))
-                  (version-compare version (second d)) 0))) true deps))
+  "True, if the sequence of dependency qualifiers deps all match the
+  provided version."
+  (reduce (fn [memo dep]
+            (and memo
+                 ((dep-fn-map (first dep))
+                  (version-compare version (second dep)) 0))) true deps))
 
 (defn segment-parse [s]
   "Tests if a string segment is numeric and if so returns it as a
