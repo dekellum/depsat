@@ -68,13 +68,15 @@
 ;; should not match 5.0.alpha.1. Other operators to properly support
 ;; pre-release versions?
 
+;; FIXME: Rename deps -> criteria here?
 (defn matches-deps? [version deps]
   "True, if the sequence of dependency qualifiers deps all match the
   provided version."
   (reduce (fn [memo dep]
             (and memo
                  ((dep-fn-map (first dep))
-                  (version-compare version (second dep)) 0))) true deps))
+                  (version-compare version (second dep)) 0)))
+          true deps))
 
 (defn segment-parse [s]
   "Tests if a string segment is numeric and if so returns it as a
