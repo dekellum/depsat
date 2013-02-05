@@ -1,0 +1,12 @@
+; 33c8c84
+
+([:versions "a" ([1 0])]
+ [:dep "a" [1 0] ( [:versions "d" ([1 0])]
+                   [:versions "c" ([2 0] [2 1] [2 2])]
+                   [:versions "b" ([1 0] [1 1] [1 2])]
+                   [:dep "b" [1 0] ( [:versions "c" ([2 0])]
+                                     [:dep "c" [2 0] ([:versions "e" ([1 0])])])]
+                   [:dep "b" [1 1] ([:versions "c" ([2 1])])]
+                   [:dep "b" [1 2] ([:versions "c" ([2 2])])]
+                   [:dep "c" [2 0] ([:versions "e" ([1 0])])]
+                   [:dep "d" [1 0] ([:versions "c" ([2 1])])] )])
