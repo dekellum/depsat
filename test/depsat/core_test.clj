@@ -1,5 +1,5 @@
 (ns depsat.core-test
-  (:use clojure.test
+  (:use (clojure test pprint)
         depsat.core)
   (:import (java.math BigInteger)
            (org.sat4j.specs ISolver)
@@ -57,7 +57,7 @@
     (is (= []
            (dep-tree { "d" [[:eq [1 0]]]})))
     (is (= []
-           (dep-tree { "a" [[:eq [1 0]]]})))
+           (pprint (dep-tree { "a" [[:eq [1 0]]]}))))
     ))
 
 (defn- ^ISolver sample []
